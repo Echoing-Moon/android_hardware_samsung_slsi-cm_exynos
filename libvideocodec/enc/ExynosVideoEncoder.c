@@ -47,7 +47,11 @@
 
 /* #define LOG_NDEBUG 0 */
 #define LOG_TAG "ExynosVideoEncoder"
-#include <utils/Log.h>
+#define ALOGE(...)
+#define ALOGV(...)
+#define ALOGW(...)
+#define ALOGD(...)
+#define ALOGI(...)
 
 #define MAX_CTRL_NUM          91
 #define H264_CTRL_NUM         91

@@ -47,7 +47,10 @@
 
 /* #define LOG_NDEBUG 0 */
 #define LOG_TAG "ExynosVideoDecoder"
-#include <utils/Log.h>
+#define ALOGE(...)
+#define ALOGV(...)
+#define ALOGW(...)
+#define ALOGD(...)
 
 #define MAX_INPUTBUFFER_COUNT 32
 #define MAX_OUTPUTBUFFER_COUNT 32
@@ -136,7 +139,6 @@ static void __Set_SupportFormat(ExynosVideoInstInfo *pVideoInstInfo)
     int nLastIndex = 0;
 
     if (pVideoInstInfo == NULL) {
-        ALOGE("%s: ExynosVideoInstInfo must be supplied", __func__);
         return ;
     }
 
@@ -229,7 +231,6 @@ static void *MFC_Decoder_Init(ExynosVideoInstInfo *pVideoInfo)
     ion_client hIonClient = -1;
 
     if (pVideoInfo == NULL) {
-        ALOGE("%s: bad parameter", __func__);
         goto EXIT_ALLOC_FAIL;
     }
 
@@ -2756,7 +2757,6 @@ static ExynosVideoErrorType MFC_Decoder_ExtensionDequeue_Outbuf(
         memcpy((char *)(&(pVideoBuffer->PDSB)), (char *)pPDSB, sizeof(PrivateDataShareBuffer));
     } else {
         ret = VIDEO_ERROR_NOBUFFERS;
-        ALOGV("%s :: %d", __FUNCTION__, __LINE__);
     }
 
     MFC_Decoder_BufferIndexFree_Outbuf(pHandle, pPDSB, buf.index);
@@ -2850,7 +2850,6 @@ ExynosVideoErrorType MFC_Exynos_Video_GetInstInfo_Decoder(
     int mode = 0, version = 0;
 
     if (pVideoInstInfo == NULL) {
-        ALOGE("%s: bad parameter", __func__);
         ret = VIDEO_ERROR_BADPARAM;
         goto EXIT;
     }
@@ -2877,13 +2876,11 @@ ExynosVideoErrorType MFC_Exynos_Video_GetInstInfo_Decoder(
     }
 
     if (hDec < 0) {
-        ALOGE("%s: Failed to open decoder device", __func__);
         ret = VIDEO_ERROR_OPENFAIL;
         goto EXIT;
     }
 
     if (exynos_v4l2_g_ctrl(hDec, V4L2_CID_MPEG_MFC_GET_VERSION_INFO, &version) != 0) {
-        ALOGW("%s: HW version information is not available", __func__);
 #ifdef USE_HEVC_HWIP
         if (pVideoInstInfo->eCodecType == VIDEO_CODING_HEVC)
             pVideoInstInfo->HwVersion = (int)HEVC_10;
@@ -2891,7 +2888,6 @@ ExynosVideoErrorType MFC_Exynos_Video_GetInstInfo_Decoder(
 #endif
             pVideoInstInfo->HwVersion = (int)MFC_65;
     } else {
-        ALOGI("%s: MFC HwVersion=0x%X", __func__, version);
         pVideoInstInfo->HwVersion = version;
     }
 

@@ -38,6 +38,14 @@ ifneq ($(filter exynos5422 exynos5430 exynos5433 exynos7420 exynos7580 exynos788
 LOCAL_CFLAGS += -DNEW_API
 endif
 
+LOCAL_SHARED_LIBRARIES := \
+	liblog \
+	libbase \
+	libutils \
+	libcutils
+
+LOCAL_LDLIBS := -llog
+
 LOCAL_MODULE := libExynosVideoApi
 LOCAL_MODULE_TAGS := optional
 LOCAL_ARM_MODE := arm

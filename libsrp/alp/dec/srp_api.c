@@ -35,13 +35,11 @@
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>
-
 #include "srp_api.h"
 
 #define LOG_NDEBUG 1
 #define LOG_TAG "libsrpapi"
 #include <utils/Log.h>
-#include <android/log.h>
 
 static struct srp_buf_info ibuf_info;
 static struct srp_buf_info obuf_info;
@@ -62,7 +60,6 @@ int SRP_Create(int block_mode)
             return SRP_ERROR_OPEN_FAIL;
     }
 
-    ALOGE("%s: Device is already opened", __func__);
     return SRP_ERROR_ALREADY_OPEN;
 }
 
@@ -79,20 +76,17 @@ int SRP_Init()
         /* mmap for OBUF */
         ret = ioctl(srp_dev, SRP_GET_MMAP_SIZE, &mmapped_size);
         if (ret < 0) {
-            ALOGE("%s: SRP_GET_MMAP_SIZE is failed", __func__);
             return SRP_ERROR_OBUF_MMAP;
         }
         obuf_info.mmapped_addr = mmap(0, mmapped_size,
                     PROT_READ | PROT_WRITE, MAP_SHARED, srp_dev, 0);
         if (!obuf_info.mmapped_addr) {
-            ALOGE("%s: mmap is failed", __func__);
             return SRP_ERROR_OBUF_MMAP;
         }
         obuf_info.mmapped_size = mmapped_size;
 
         ret = SRP_RETURN_OK;
     } else {
-        ALOGE("%s: Device is not ready", __func__);
         ret = SRP_ERROR_NOT_READY; /* device is not created */
     }
 
@@ -105,13 +99,10 @@ int SRP_Decode(void *buff, int size_byte)
 
     if (srp_dev != -1) {
         if (size_byte > 0) {
-            ALOGV("%s: Send data to RP (%d bytes)", __func__, size_byte);
 
             ret = write(srp_dev, buff, size_byte);  /* Write Buffer to RP Driver */
             if (ret < 0) {
                 ret = -errno;
-                if (ret != SRP_ERROR_IBUF_OVERFLOW)
-                    ALOGE("SRP_Decode returned error code: %d", ret);
             }
             return ret; /* Write Success */
         } else {
@@ -119,7 +110,6 @@ int SRP_Decode(void *buff, int size_byte)
         }
     }
 
-    ALOGE("%s: Device is not ready", __func__);
     return SRP_ERROR_NOT_READY;
 }
 
@@ -163,7 +153,6 @@ int SRP_Get_PCM(void **addr, unsigned int *size)
         ret = read(srp_dev, &pcm_info, 0);
         if (ret == -1) {
             *size = 0;
-            ALOGE("%s: PCM read fail", __func__);
             return SRP_ERROR_OBUF_READ;
         }
 
@@ -184,11 +173,9 @@ int SRP_Get_Dec_Info(struct srp_dec_info *dec_info)
         ret = ioctl(srp_dev, SRP_GET_DEC_INFO, dec_info);
         if (ret < 0) {
             ret = -errno;
-            ALOGE("%s: Failed to get dec info", __func__);
             return ret;
         }
 
-        ALOGV("numChannels(%d), samplingRate(%d)", dec_info->channels, dec_info->sample_rate);
 
         ret = SRP_RETURN_OK;
     } else {
@@ -205,7 +192,6 @@ int SRP_Get_Ibuf_Info(void **addr, unsigned int *size, unsigned int *num)
     if (srp_dev != -1) {
         ret = ioctl(srp_dev, SRP_GET_IBUF_INFO, &ibuf_info);
         if (ret == -1) {
-            ALOGE("%s: Failed to get Ibuf info", __func__);
             return SRP_ERROR_IBUF_INFO;
         }
 
@@ -214,7 +200,6 @@ int SRP_Get_Ibuf_Info(void **addr, unsigned int *size, unsigned int *num)
         *num = ibuf_info.num;
 
         if (*num == 0) {
-            ALOGE("%s: IBUF num is 0", __func__);
             return SRP_ERROR_INVALID_SETTING;
         }
 
@@ -234,7 +219,6 @@ int SRP_Get_Obuf_Info(void **addr, unsigned int *size, unsigned int *num)
         if (obuf_info.addr == NULL) {
             ret = ioctl(srp_dev, SRP_GET_OBUF_INFO, &obuf_info);
             if (ret < 0) {
-                ALOGE("%s: SRP_GET_OBUF_INFO is failed", __func__);
                 return SRP_ERROR_OBUF_INFO;
             }
         }
@@ -244,7 +228,6 @@ int SRP_Get_Obuf_Info(void **addr, unsigned int *size, unsigned int *num)
         *num = obuf_info.num;
 
         if (*num == 0) {
-            ALOGE("%s: OBUF num is 0", __func__);
             return SRP_ERROR_INVALID_SETTING;
         }
 
@@ -285,10 +268,8 @@ int SRP_Terminate(void)
 int SRP_IsOpen(void)
 {
     if (srp_dev == -1) {
-        ALOGV("%s: Device is not opened", __func__);
         return 0;
     }
 
-    ALOGV("%s: Device is opened", __func__);
     return 1;
 }
